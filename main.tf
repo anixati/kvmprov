@@ -9,6 +9,7 @@ resource "libvirt_pool" "ubuntu" {
   type = "dir"
   path = "/tmp/tfm-prov-lv-pool-ubuntu"
 }
+
 # ubuntu pool 
 resource "libvirt_volume" "ubuntu-qcow2" {
   name   = "ubuntu-qcow2"
@@ -20,7 +21,6 @@ resource "libvirt_volume" "ubuntu-qcow2" {
 data "template_file" "user_data" {
   template = file("${path.module}/cloud_init.cfg")
 }
-
 data "template_file" "network_config" {
   template = file("${path.module}/network_init.cfg")
 }
@@ -33,13 +33,12 @@ resource "libvirt_cloudinit_disk" "commoninit" {
 }
 
 
-# Create the machine
-resource "libvirt_domain" "domain-ubuntu" {
-  count  = "${length(var.nodes)}"
-  name   = "UBU_${lookup(var.nodes[count.index], "hostname")}"
+#Create Node 1
+
+resource "libvirt_domain" "ubuntu-box1" {
+  name   = "UBU_NODE01"
   memory = var.memoryMB
   vcpu = var.cpu
-
   cloudinit = libvirt_cloudinit_disk.commoninit.id
   network_interface {
     network_name = "default"
@@ -63,6 +62,38 @@ resource "libvirt_domain" "domain-ubuntu" {
     autoport    = true
   }
 }
+
+#Create Node 2
+
+resource "libvirt_domain" "ubuntu-box2" {
+  name   = "UBU_NODE02"
+  memory = var.memoryMB
+  vcpu = var.cpu
+  cloudinit = libvirt_cloudinit_disk.commoninit.id
+  network_interface {
+    network_name = "default"
+  }
+  console {
+    type        = "pty"
+    target_port = "0"
+    target_type = "serial"
+  }
+  console {
+    type        = "pty"
+    target_type = "virtio"
+    target_port = "1"
+  }
+  disk {
+    volume_id = libvirt_volume.ubuntu-qcow2.id
+  }
+  graphics {
+    type        = "spice"
+    listen_type = "address"
+    autoport    = true
+  }
+}
+
+
 
 
 terraform {

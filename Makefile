@@ -1,17 +1,12 @@
-THISDIR := $(notdir $(CURDIR))
+terraTHISDIR := $(notdir $(CURDIR))
 PROJECT := daddario
-
-apply:
-	terraform apply -auto-approve
-init:
-	terraform init
+a:  terraform apply -auto-approve
+i:  terraform init
+p:  terraform plan
 ## recreate terraform resources
-rebuild: destroy apply
-destroy:
-	terraform destroy -auto-approve
+r:  destroy apply
+d:  terraform destroy -auto-approve
 ## create public/private keypair for ssh
-keypair:
-	@echo "THIDIR=$(THISDIR)"
-	ssh-keygen -t rsa -b 4096 -f id_rsa -C $(PROJECT) -N "" -q
-metadata:
-	terraform refresh && terraform output ips
+kp:  @echo "THIDIR=$(THISDIR)"
+  ssh-keygen -t a -b 4096 -f id_rsa -C $(PROJECT) -N "" -q
+md:  terraform refresh && terraform output ips
